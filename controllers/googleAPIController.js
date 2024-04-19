@@ -7,13 +7,16 @@ const util = new Util();
 class GoogleAPIController {
   static async getData(req, res) {
     try {
-      console.log("entered");
-      const data = await GoogleAPIService.getData();
+      if (!req.query.place) {
+        util.setError(400, "Please provide place name!`");
+        return util.send(res);
+      }
+      const data = await GoogleAPIService.getData(req.query.place);
       console.log("data=", data);
-      util.setSuccess(200, "loged in successfully", data);
+      util.setSuccess(200, "Data displayed successfully!", data);
       return util.send(res);
     } catch (error) {
-      util.setError(500, `Error`);
+      return util.setError(500, `Error`);
     }
   }
 }
