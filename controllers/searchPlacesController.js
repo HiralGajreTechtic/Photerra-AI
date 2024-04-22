@@ -4,14 +4,14 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const util = new Util();
 
-class GoogleAPIController {
-  static async getData(req, res) {
+class SearchPlacesController {
+  static async getPlacesBySearch(req, res) {
     try {
       if (!req.query.place) {
         util.setError(400, "Please provide place name!`");
         return util.send(res);
       }
-      const data = await GoogleAPIService.getData(req);
+      const data = await GoogleAPIService.getPlacesBySearch(req);
 
       util.setSuccess(200, "Data displayed successfully!", data);
       return util.send(res);
@@ -20,16 +20,5 @@ class GoogleAPIController {
       return util.send(res);
     }
   }
-
-  static async insertData(req, res) {
-    try {
-      await GoogleAPIService.insertUpdateData(req.body);
-      util.setSuccess(200, "Data inserted successfully!");
-      return util.send(res);
-    } catch (error) {
-      util.setError(500, `Error while inserting data: ${error}`);
-      return util.send(res);
-    }
-  }
 }
-module.exports = GoogleAPIController;
+module.exports = SearchPlacesController;

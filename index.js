@@ -29,6 +29,7 @@ db.mongoose
 
 // Add your routes and other middleware here
 app.use("/api/googleAPIData", require("./routes/googleAPIRoute"));
+app.use("/api/searchPlacesByKeyword", require("./routes/googleAPIRoute"));
 
 const PORT = 3010;
 app.listen(PORT, () => {

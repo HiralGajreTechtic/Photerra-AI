@@ -20,7 +20,10 @@ const googlePlaces = new Schema({
     type: String,
   },
   plus_code: {
-    type: String,
+    type: Object,
+  },
+  geometry: {
+    type: Object,
   },
   rating: {
     type: Number,
@@ -30,6 +33,10 @@ const googlePlaces = new Schema({
   },
   user_ratings_total: {
     type: Number,
+  },
+  insertedAt: {
+    type: Date,
+    default: Date.now, // Set the default value to the current date and time
   },
 });
 
