@@ -11,6 +11,21 @@ class GoogleAPIController {
         util.setError(400, "Please provide place name!`");
         return util.send(res);
       }
+      const data = await GoogleAPIService.getData(req.query);
+
+      util.setSuccess(200, "Data displayed successfully!", data);
+      return util.send(res);
+    } catch (error) {
+      return util.setError(500, `Error`);
+    }
+  }
+
+  static async insertData(req, res) {
+    try {
+      if (!req.query.place) {
+        util.setError(400, "Please provide place name!`");
+        return util.send(res);
+      }
       const data = await GoogleAPIService.getData(req.query.place);
       console.log("data=", data);
       util.setSuccess(200, "Data displayed successfully!", data);
