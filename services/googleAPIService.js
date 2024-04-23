@@ -19,7 +19,7 @@ class GoogleAPIService {
       let response = await axios.get(url);
       return response.data;
     } catch (error) {
-      throw error;
+      throw new Error(error);
     }
   }
 
@@ -75,7 +75,7 @@ class GoogleAPIService {
       });
       return placeExists;
     } catch (error) {
-      throw error;
+      throw new Error(error);
     }
   }
 }

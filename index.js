@@ -16,7 +16,7 @@ const db = require("./src/config/db"); //to make connection globally accessible
 
 // Add your routes and other middleware here
 app.use("/api/googleAPIData", require("./routes/googleAPIRoute"));
-app.use("/api/searchPlacesByKeyword", require("./routes/searchPlacesRoute"));
+app.use("/api/places", require("./routes/searchPlacesRoute"));
 app.use("/api/searchTypes", require("./routes/searchTypesRoute"));
 
 const PORT = 3010;

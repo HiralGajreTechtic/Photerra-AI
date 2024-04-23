@@ -6,7 +6,7 @@ class SearchTypesService {
       const result = await SearchTypesModel.find({});
       return result;
     } catch (error) {
-      throw error;
+      throw new Error(error);
     }
   }
 }

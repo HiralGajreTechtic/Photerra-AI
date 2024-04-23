@@ -10,7 +10,19 @@ class SearchPlacesService {
       });
       return result;
     } catch (error) {
-      throw error;
+      throw new Error(error);
+    }
+  }
+
+  static async getAddressByLatLng(req) {
+    try {
+      let addressData = await googlePlaceModel.find({
+        "geometry.location.lng": parseFloat(req.query.lng),
+        "geometry.location.lat": parseFloat(req.query.lat),
+      });
+      return addressData;
+    } catch (error) {
+      throw new Error(error);
     }
   }
 }

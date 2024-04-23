@@ -6,6 +6,7 @@ const SearchPlacesController = require("../controllers/searchPlacesController");
 // const verifyToken = require("../middleware/auth");
 
 // router.use(verifyToken);
-router.get("/", SearchPlacesController.getPlacesBySearch);
+router.get("/searchByKeyword", SearchPlacesController.getPlacesBySearch);
+router.get("/getAddressByLatLng", SearchPlacesController.getAddressByLatLng);
 
 module.exports = router;
