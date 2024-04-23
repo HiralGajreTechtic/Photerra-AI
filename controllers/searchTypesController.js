@@ -8,7 +8,6 @@ class SearchTypesController {
   static async getSearchTypes(req, res) {
     try {
       const data = await SearchTypesService.getSearchTypes();
-
       util.setSuccess(200, "Data displayed successfully!", data);
       return util.send(res);
     } catch (error) {

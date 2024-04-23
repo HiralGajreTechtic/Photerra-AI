@@ -37,21 +37,20 @@ class GoogleAPIService {
         if (placeExists.length <= 0) {
           insertionData.push(payload[i]);
         } else {
-          let place_id = new ObjectId(placeExists[0]._id);
-          delete placeExists[0]._id;
-          let ans = await googlePlaceModel.updateOne(
+          let place_id = placeExists[0]._id;
+          await googlePlaceModel.updateOne(
             { _id: place_id },
             {
               $set: {
-                formatted_address: placeExists[0].formatted_address,
-                icon: placeExists[0].icon,
-                photos: placeExists[0].photos,
-                place_id: placeExists[0].place_id,
-                plus_code: placeExists[0].plus_code,
-                rating: placeExists[0].rating,
-                types: placeExists[0].types,
-                user_ratings_total: placeExists[0].user_ratings_total,
-                updateAt: new Date(),
+                formatted_address: payload[i].formatted_address,
+                icon: payload[i].icon,
+                photos: payload[i].photos,
+                place_id: payload[i].place_id,
+                plus_code: payload[i].plus_code,
+                rating: payload[i].rating,
+                types: payload[i].types,
+                user_ratings_total: payload[i].user_ratings_total,
+                updatedAt: new Date(),
               },
             }
           );

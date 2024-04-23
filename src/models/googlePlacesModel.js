@@ -38,6 +38,10 @@ const googlePlaces = new Schema({
     type: Date,
     default: Date.now, // Set the default value to the current date and time
   },
+  updatedAt: {
+    type: Date,
+    default: null,
+  },
 });
 
 const GooglePlacesModel = mongoose.model("google_places", googlePlaces);
