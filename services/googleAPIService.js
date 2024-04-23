@@ -19,7 +19,6 @@ class GoogleAPIService {
       let response = await axios.get(url);
       return response.data;
     } catch (error) {
-      console.log("error--", error);
       throw error;
     }
   }
@@ -75,10 +74,8 @@ class GoogleAPIService {
       let placeExists = await googlePlaceModel.find({
         $expr: { $regexMatch: { input: "name", regex: regexPattern } },
       });
-      console.log("placeExists=", placeExists);
       return placeExists;
     } catch (error) {
-      console.log("error--", error);
       throw error;
     }
   }
