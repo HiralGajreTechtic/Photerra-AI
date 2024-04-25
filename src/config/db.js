@@ -5,7 +5,7 @@ const GooglePlacesModel = require("../models/googlePlacesModel");
 mongoose.Promise = global.Promise;
 const db = {};
 db.mongoose = mongoose;
-db.url = "mongodb://localhost:27017/photerra_ai";
+db.url = process.env.DB_URL;
 db.mongoose
   .connect(db.url, {
     useNewUrlParser: true,

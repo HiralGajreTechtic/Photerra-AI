@@ -3,9 +3,12 @@ const router = express.Router();
 const passport = require("passport");
 router.use(passport.initialize());
 const SearchTypesController = require("../controllers/searchTypesController");
-// const verifyToken = require("../middleware/auth");
+const verifyToken = require("../middleware/auth");
 
-// router.use(verifyToken);
-router.get("/", SearchTypesController.getSearchTypes);
+router.get(
+  "/",
+  verifyToken.authenticate("jwt", { session: false }),
+  SearchTypesController.getSearchTypes
+);
 
 module.exports = router;

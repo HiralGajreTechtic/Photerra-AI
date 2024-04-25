@@ -11,7 +11,6 @@ const jwtOptions = {
 
 passport.use(
   new JwtStrategy(jwtOptions, (payload, done) => {
-    console.log("payload=", payload);
     const user = { id: payload.sub };
     if (user) {
       return done(null, user);

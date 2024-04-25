@@ -25,7 +25,6 @@ class GoogleAPIService {
 
   static async insertUpdateData(payload) {
     try {
-      //store place name in each object from UI
       let insertionData = [];
 
       for (let i in payload) {
