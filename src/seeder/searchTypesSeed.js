@@ -46,7 +46,7 @@ async function seedData() {
       { name: "Zoo", type: "zoo" },
     ];
 
-    await db.mongoose.connect("mongodb://localhost:27017/photerra_ai", {
+    await db.mongoose.connect(process.env.DB_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
