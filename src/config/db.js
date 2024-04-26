@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const SearchTypesModel = require("../models/searchTypesModel");
 const GooglePlacesModel = require("../models/googlePlacesModel");
+require("dotenv").config();
 
 mongoose.Promise = global.Promise;
 const db = {};

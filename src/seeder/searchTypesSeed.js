@@ -1,5 +1,6 @@
 const db = require("../config/db"); // Require the database connection
 const SearchTypesModel = require("../models/searchTypesModel");
+require("dotenv").config();
 
 async function seedData() {
   try {
@@ -45,8 +46,8 @@ async function seedData() {
       { name: "Train Station", type: "train_station" },
       { name: "Zoo", type: "zoo" },
     ];
-
-    await db.mongoose.connect(process.env.DB_URL, {
+    const mongoDBURL = process.env.DB_URL;
+    await db.mongoose.connect(mongoDBURL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
