@@ -13,9 +13,10 @@ class GoogleAPIService {
       let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?key=${apiKey}&query=${encodeURIComponent(
         query
       )}`;
-      if (req.pagetoken) {
-        url = url + `&pagetoken=${req.pagetoken}`;
+      if (req.query.pagetoken) {
+        url = url + `&pagetoken=${req.query.pagetoken}`;
       }
+      console.log("url=", url);
       let response = await axios.get(url);
       return response.data;
     } catch (error) {
