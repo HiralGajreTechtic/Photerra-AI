@@ -10,9 +10,11 @@ class GoogleAPIService {
       const apiKey = process.env.GOOGLE_API_KEY;
       const query = req.query.query;
 
-      let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?key=${apiKey}&query=${encodeURIComponent(
-        query
-      )}`;
+      let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?key=${apiKey}`;
+
+      if (query) {
+        url = url + `&query=${encodeURIComponent(query)}`;
+      }
       if (req.query.pagetoken) {
         url = url + `&pagetoken=${req.query.pagetoken}`;
       }
