@@ -19,7 +19,7 @@ app.use("/api/googleAPIData", require("./routes/googleAPIRoute"));
 app.use("/api/places", require("./routes/searchPlacesRoute"));
 app.use("/api/searchTypes", require("./routes/searchTypesRoute"));
 
-const PORT = 3012;
+const PORT = 3010;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
