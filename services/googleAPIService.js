@@ -10,15 +10,16 @@ class GoogleAPIService {
       const apiKey = process.env.GOOGLE_API_KEY;
       const query = req.query.query;
 
-      let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?key=${apiKey}`;
+      let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?`;
 
       if (query) {
-        url = url + `&query=${encodeURIComponent(query)}`;
+        url = url + `&query=${decodeURIComponent(query)}`;
       }
       if (req.query.pagetoken) {
         url = url + `&pagetoken=${req.query.pagetoken}`;
       }
-      console.log("url=", url);
+      url = url + `&key=${apiKey}`;
+      console.log("uri--", url);
       let response = await axios.get(url);
       return response.data;
     } catch (error) {
