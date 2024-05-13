@@ -13,7 +13,7 @@ const maxSizeInBytes = 5 * 1024 * 1024;
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ limit: maxSizeInBytes, extended: true }));
 const db = require("./src/config/db"); //to make connection globally accessible
-
+app.use(express.static("public"));
 // Add your routes and other middleware here
 app.use("/api/googleAPIData", require("./routes/googleAPIRoute"));
 app.use("/api/places", require("./routes/searchPlacesRoute"));

@@ -8,7 +8,7 @@ class SearchPlacesController {
   static async getPlacesBySearch(req, res) {
     try {
       if (!req.query.search) {
-        util.setError(400, "Please provide search keyword!`");
+        util.setSuccess(200, "Data displayed successfully!", []);
         return util.send(res);
       }
       const data = await searchPlacesService.getPlacesBySearch(req);
