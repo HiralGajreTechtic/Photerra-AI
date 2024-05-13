@@ -9,8 +9,7 @@ class SearchPlacesService {
         name: { $regex: regexPattern },
       });
       for (let i in result) {
-        result[i].formatted_address =
-          result[i].name + " - " + result[i].formatted_address;
+        result[i].name = result[i].name + " - " + result[i].formatted_address;
       }
       return result;
     } catch (error) {
