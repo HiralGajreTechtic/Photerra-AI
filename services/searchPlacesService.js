@@ -4,7 +4,7 @@ class SearchPlacesService {
     try {
       const search = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const regexPattern = new RegExp(`^${search}`, "i");
-
+      console.log("regexPattern=", regexPattern);
       const result = await googlePlaceModel.find({
         name: { $regex: regexPattern },
       });
