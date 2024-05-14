@@ -28,6 +28,25 @@ class GoogleAPIService {
       throw new Error(error);
     }
   }
+  // Load the MobileNet model
+  static async loadModel() {
+    try {
+      const model = await mobilenet.load();
+      return model;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async classifyImage(filePath, model) {
+    try {
+      const image = tf.node.decodeImage(fs.readFileSync(filePath));
+      const predictions = await model.classify(image);
+      return predictions;
+    } catch (error) {
+      throw error;
+    }
+  }
 
   static async insertUpdateData(payload) {
     try {
@@ -35,7 +54,6 @@ class GoogleAPIService {
       let insertionData = [];
       const filePaths = [];
       for (let i in payload) {
-        console.log("payload  i =", payload[i].place_id);
         const apiUrl = "https://maps.googleapis.com/maps/api/place/photo";
         const params = {
           maxwidth: 400, // Adjust maxwidth and maxheight as needed
@@ -47,40 +65,48 @@ class GoogleAPIService {
           responseType: "stream",
         });
         // console.log("image--", imageResponse);
+        let fileName;
         if (imageResponse) {
           const publicDirectory = path.join(__dirname, "..", "public");
           const imagesDirectory = path.join(publicDirectory, "images");
           // Define the file path for the image
-          const fileName = `${payload[i].place_id}.jpg`;
+          fileName = `${payload[i].place_id}.jpg`;
 
           // Construct the file path
           const filePath = path.join(imagesDirectory, fileName);
-          console.log("filePath=", filePath);
+
           // Check if the file exists
           if (fs.existsSync(filePath)) {
             // If the file exists, delete it
-            fs.unlink(filePath, (error) => {
+            await fs.unlink(filePath, async (error) => {
               if (error) {
                 console.error("Error deleting the existing image:", error);
               } else {
                 console.log("Existing image deleted successfully");
+                const fileStream = await fs.createWriteStream(filePath);
+                imageResponse.data.pipe(fileStream);
               }
             });
+          } else {
+            const fileStream = await fs.createWriteStream(filePath);
+            imageResponse.data.pipe(fileStream);
           }
-          const fileStream = fs.createWriteStream(filePath);
-          imageResponse.data.pipe(fileStream);
-          // fileStream.on("finish", () => {
-          //   fileStream.close();
-          // });
-        }
 
+          console.log("filePath file--", filePath);
+          const imagePath = filePath;
+          const model = await this.loadModel();
+          const predictions = await this.classifyImage(imagePath, model);
+          console.log("predictions==", predictions);
+        }
+        console.log("outside---");
         let placeExists = await googlePlaceModel.find({
           "geometry.location.lng": payload[i].geometry.location.lng,
           "geometry.location.lat": payload[i].geometry.location.lat,
           name: payload[i].name,
         });
+
         if (placeExists.length <= 0) {
-          insertionData.push(payload[i]);
+          insertionData.push({ ...payload[i], image: `/image/${fileName}` });
         } else {
           let place_id = placeExists[0]._id;
           await googlePlaceModel.updateOne(
@@ -95,6 +121,7 @@ class GoogleAPIService {
                 rating: payload[i].rating,
                 types: payload[i].types,
                 user_ratings_total: payload[i].user_ratings_total,
+                image: `/image/${fileName}`,
                 updatedAt: new Date(),
               },
             }

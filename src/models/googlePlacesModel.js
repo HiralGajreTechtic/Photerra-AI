@@ -38,6 +38,9 @@ const googlePlaces = new Schema({
     type: Date,
     default: Date.now, // Set the default value to the current date and time
   },
+  image: {
+    type: String,
+  },
   updatedAt: {
     type: Date,
     default: null,
