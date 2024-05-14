@@ -3,11 +3,14 @@ const axios = require("axios");
 const fetch = require("node-fetch");
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
-
+const apiKey = process.env.GOOGLE_API_KEY;
+const fs = require("fs");
+const path = require("path");
+const tf = require("@tensorflow/tfjs-node");
+const mobilenet = require("@tensorflow-models/mobilenet");
 class GoogleAPIService {
   static async getData(req) {
     try {
-      const apiKey = process.env.GOOGLE_API_KEY;
       const query = req.query.query;
 
       let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?`;
@@ -19,7 +22,6 @@ class GoogleAPIService {
         url = url + `&pagetoken=${req.query.pagetoken}`;
       }
       url = url + `&key=${apiKey}`;
-      console.log("uri--", url);
       let response = await axios.get(url);
       return response.data;
     } catch (error) {
@@ -29,9 +31,49 @@ class GoogleAPIService {
 
   static async insertUpdateData(payload) {
     try {
+      //save photo, its category and store country, city
       let insertionData = [];
-
+      const filePaths = [];
       for (let i in payload) {
+        console.log("payload  i =", payload[i].place_id);
+        const apiUrl = "https://maps.googleapis.com/maps/api/place/photo";
+        const params = {
+          maxwidth: 400, // Adjust maxwidth and maxheight as needed
+          photoreference: payload[i].photos[0].photo_reference,
+          key: apiKey, // Replace with your actual API key
+        };
+        const imageResponse = await axios.get(apiUrl, {
+          params,
+          responseType: "stream",
+        });
+        // console.log("image--", imageResponse);
+        if (imageResponse) {
+          const publicDirectory = path.join(__dirname, "..", "public");
+          const imagesDirectory = path.join(publicDirectory, "images");
+          // Define the file path for the image
+          const fileName = `${payload[i].place_id}.jpg`;
+
+          // Construct the file path
+          const filePath = path.join(imagesDirectory, fileName);
+          console.log("filePath=", filePath);
+          // Check if the file exists
+          if (fs.existsSync(filePath)) {
+            // If the file exists, delete it
+            fs.unlink(filePath, (error) => {
+              if (error) {
+                console.error("Error deleting the existing image:", error);
+              } else {
+                console.log("Existing image deleted successfully");
+              }
+            });
+          }
+          const fileStream = fs.createWriteStream(filePath);
+          imageResponse.data.pipe(fileStream);
+          // fileStream.on("finish", () => {
+          //   fileStream.close();
+          // });
+        }
+
         let placeExists = await googlePlaceModel.find({
           "geometry.location.lng": payload[i].geometry.location.lng,
           "geometry.location.lat": payload[i].geometry.location.lat,
