@@ -41,6 +41,9 @@ const googlePlaces = new Schema({
   image: {
     type: String,
   },
+  address_components: {
+    type: Array,
+  },
   updatedAt: {
     type: Date,
     default: null,

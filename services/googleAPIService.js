@@ -11,6 +11,36 @@ const mobilenet = require("@tensorflow-models/mobilenet");
 class GoogleAPIService {
   static async getData(req) {
     try {
+      // const url = "https://places.googleapis.com/v1/places:searchText";
+      // const detailsUrl =
+      //   "https://maps.googleapis.com/maps/api/place/details/json"; //get name
+
+      // const requestData = {
+      //   textQuery: req.query.query,
+      // };
+
+      // const config = {
+      //   headers: {
+      //     "Content-Type": "application/json",
+      //     "X-Goog-Api-Key": apiKey,
+      //     "X-Goog-FieldMask": "places,nextPageToken",
+      //   },
+      // };
+
+      // let response = await axios.post(url, requestData, config);
+      // console.log("response==", response.data);
+      // if (response) {
+      //   for (let i in response.data.places) {
+      //     let nameResponse = await axios.get(
+      //       `${detailsUrl}?place_id=${response.data.places[i].id}&key=${apiKey}`
+      //     );
+      //     response.data.places[i].placeName = nameResponse.data.result.name;
+      //     response.data.places[i].icon = nameResponse.data.result.icon;
+      //   }
+      //   response.data.results = response.data.places;
+      //   delete response.data.places;
+      // }
+
       const query = req.query.query;
 
       let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?`;
@@ -23,6 +53,7 @@ class GoogleAPIService {
       }
       url = url + `&key=${apiKey}`;
       let response = await axios.get(url);
+
       return response.data;
     } catch (error) {
       throw new Error(error);
@@ -50,63 +81,74 @@ class GoogleAPIService {
 
   static async insertUpdateData(payload) {
     try {
-      //save photo, its category and store country, city
       let insertionData = [];
       const filePaths = [];
+      let address_components, fileName;
+
       for (let i in payload) {
-        const apiUrl = "https://maps.googleapis.com/maps/api/place/photo";
-        const params = {
-          maxwidth: 400, // Adjust maxwidth and maxheight as needed
-          photoreference: payload[i].photos[0].photo_reference,
-          key: apiKey, // Replace with your actual API key
-        };
-        const imageResponse = await axios.get(apiUrl, {
-          params,
-          responseType: "stream",
-        });
-        // console.log("image--", imageResponse);
-        let fileName;
-        if (imageResponse) {
-          const publicDirectory = path.join(__dirname, "..", "public");
-          const imagesDirectory = path.join(publicDirectory, "images");
-          // Define the file path for the image
-          fileName = `${payload[i].place_id}.jpg`;
+        //get the address components
+        let nameResponse = await axios.get(
+          `https://maps.googleapis.com/maps/api/place/details/json?place_id=${payload[i].place_id}&key=${apiKey}`
+        );
+        address_components = nameResponse.data.result.address_components;
 
-          // Construct the file path
-          const filePath = path.join(imagesDirectory, fileName);
+        if (payload[i].photos?.length > 0) {
+          //get the photos
+          const apiUrl = "https://maps.googleapis.com/maps/api/place/photo";
+          const params = {
+            maxwidth: 400,
+            photoreference: payload[i].photos[0].photo_reference,
+            key: apiKey,
+          };
+          const imageResponse = await axios.get(apiUrl, {
+            params,
+            responseType: "stream",
+          });
 
-          // Check if the file exists
-          if (fs.existsSync(filePath)) {
-            // If the file exists, delete it
-            await fs.unlink(filePath, async (error) => {
-              if (error) {
-                console.error("Error deleting the existing image:", error);
-              } else {
-                console.log("Existing image deleted successfully");
-                const fileStream = await fs.createWriteStream(filePath);
-                imageResponse.data.pipe(fileStream);
-              }
-            });
-          } else {
-            const fileStream = await fs.createWriteStream(filePath);
-            imageResponse.data.pipe(fileStream);
+          if (imageResponse) {
+            const publicDirectory = path.join(__dirname, "..", "public");
+            const imagesDirectory = path.join(publicDirectory, "images");
+            // Define the file path for the image
+            fileName = `${payload[i].place_id}.jpg`;
+
+            // Construct the file path
+            const filePath = path.join(imagesDirectory, fileName);
+
+            // Check if the file exists
+            // if (fs.existsSync(filePath)) {
+            //   // If the file exists, delete it
+            //   await fs.unlink(filePath, async (error) => {
+            //     if (error) {
+            //       console.error("Error deleting the existing image:", error);
+            //     } else {
+            //       const fileStream = await fs.createWriteStream(filePath);
+            //       imageResponse.data.pipe(fileStream);
+            //     }
+            //   });
+            // } else {
+            //   const fileStream = await fs.createWriteStream(filePath);
+            //   imageResponse.data.pipe(fileStream);
+            // }
+
+            // const imagePath = filePath;
+            // const model = await this.loadModel();
+            // const predictions = await this.classifyImage(imagePath, model);
+            // console.log("predictions==", predictions);
           }
-
-          console.log("filePath file--", filePath);
-          const imagePath = filePath;
-          const model = await this.loadModel();
-          const predictions = await this.classifyImage(imagePath, model);
-          console.log("predictions==", predictions);
         }
-        console.log("outside---");
+
         let placeExists = await googlePlaceModel.find({
           "geometry.location.lng": payload[i].geometry.location.lng,
           "geometry.location.lat": payload[i].geometry.location.lat,
           name: payload[i].name,
         });
-
+        console.log("placeExists-", placeExists);
         if (placeExists.length <= 0) {
-          insertionData.push({ ...payload[i], image: `/image/${fileName}` });
+          insertionData.push({
+            ...payload[i],
+            image: `/image/${fileName}`,
+            address_components: address_components,
+          });
         } else {
           let place_id = placeExists[0]._id;
           await googlePlaceModel.updateOne(
@@ -122,6 +164,7 @@ class GoogleAPIService {
                 types: payload[i].types,
                 user_ratings_total: payload[i].user_ratings_total,
                 image: `/image/${fileName}`,
+                address_components: address_components,
                 updatedAt: new Date(),
               },
             }

@@ -23,7 +23,7 @@ class GoogleAPIController {
 
   static async insertData(req, res) {
     try {
-      await GoogleAPIService.insertUpdateData(req.body);
+      GoogleAPIService.insertUpdateData(req.body);
       util.setSuccess(200, "Data inserted successfully!");
       return util.send(res);
     } catch (error) {
