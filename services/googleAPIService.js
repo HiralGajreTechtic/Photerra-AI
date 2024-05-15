@@ -8,39 +8,11 @@ const fs = require("fs");
 const path = require("path");
 const tf = require("@tensorflow/tfjs-node");
 const mobilenet = require("@tensorflow-models/mobilenet");
+const sharp = require("sharp");
+
 class GoogleAPIService {
   static async getData(req) {
     try {
-      // const url = "https://places.googleapis.com/v1/places:searchText";
-      // const detailsUrl =
-      //   "https://maps.googleapis.com/maps/api/place/details/json"; //get name
-
-      // const requestData = {
-      //   textQuery: req.query.query,
-      // };
-
-      // const config = {
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //     "X-Goog-Api-Key": apiKey,
-      //     "X-Goog-FieldMask": "places,nextPageToken",
-      //   },
-      // };
-
-      // let response = await axios.post(url, requestData, config);
-      // console.log("response==", response.data);
-      // if (response) {
-      //   for (let i in response.data.places) {
-      //     let nameResponse = await axios.get(
-      //       `${detailsUrl}?place_id=${response.data.places[i].id}&key=${apiKey}`
-      //     );
-      //     response.data.places[i].placeName = nameResponse.data.result.name;
-      //     response.data.places[i].icon = nameResponse.data.result.icon;
-      //   }
-      //   response.data.results = response.data.places;
-      //   delete response.data.places;
-      // }
-
       const query = req.query.query;
 
       let url = `https://maps.googleapis.com/maps/api/place/textsearch/json?`;
@@ -81,6 +53,7 @@ class GoogleAPIService {
 
   static async insertUpdateData(payload) {
     try {
+      //give teh catgeories to AI and it will find the category as per image
       let insertionData = [];
       const filePaths = [];
       let address_components, fileName;
@@ -113,7 +86,7 @@ class GoogleAPIService {
 
             // Construct the file path
             const filePath = path.join(imagesDirectory, fileName);
-
+            console.log("filePath=", filePath);
             // Check if the file exists
             // if (fs.existsSync(filePath)) {
             //   // If the file exists, delete it
@@ -129,6 +102,41 @@ class GoogleAPIService {
             //   const fileStream = await fs.createWriteStream(filePath);
             //   imageResponse.data.pipe(fileStream);
             // }
+
+            const categories = [
+              [
+                "Art",
+                "Architecture",
+                "Beaches",
+                "Camping",
+                "Cuisine",
+                "City",
+                "Climbing",
+                "Commercial",
+                "Events",
+                "Forests",
+                "Hiking",
+                "Lakes & rivers",
+                "Landmarks",
+                "Landscapes",
+                "Lodging",
+                "Mountains",
+                "Oceans",
+                "Parks",
+                "Sports",
+                "Trails",
+                "Transportation",
+                "Viewpoints",
+                "Wildlife",
+                "Tmp",
+                "Relaxing",
+                "Music",
+                "12",
+                "New",
+              ],
+            ];
+
+            // Determine the best-fit category
 
             // const imagePath = filePath;
             // const model = await this.loadModel();

@@ -44,6 +44,12 @@ const googlePlaces = new Schema({
   address_components: {
     type: Array,
   },
+  category_ids: {
+    type: Array,
+  },
+  tag_ids: {
+    type: Array,
+  },
   updatedAt: {
     type: Date,
     default: null,
