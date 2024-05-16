@@ -8,7 +8,6 @@ const fs = require("fs");
 const path = require("path");
 const tf = require("@tensorflow/tfjs-node");
 const mobilenet = require("@tensorflow-models/mobilenet");
-const sharp = require("sharp");
 
 class GoogleAPIService {
   static async getData(req) {
@@ -88,53 +87,20 @@ class GoogleAPIService {
             const filePath = path.join(imagesDirectory, fileName);
             console.log("filePath=", filePath);
             // Check if the file exists
-            // if (fs.existsSync(filePath)) {
-            //   // If the file exists, delete it
-            //   await fs.unlink(filePath, async (error) => {
-            //     if (error) {
-            //       console.error("Error deleting the existing image:", error);
-            //     } else {
-            //       const fileStream = await fs.createWriteStream(filePath);
-            //       imageResponse.data.pipe(fileStream);
-            //     }
-            //   });
-            // } else {
-            //   const fileStream = await fs.createWriteStream(filePath);
-            //   imageResponse.data.pipe(fileStream);
-            // }
-
-            const categories = [
-              [
-                "Art",
-                "Architecture",
-                "Beaches",
-                "Camping",
-                "Cuisine",
-                "City",
-                "Climbing",
-                "Commercial",
-                "Events",
-                "Forests",
-                "Hiking",
-                "Lakes & rivers",
-                "Landmarks",
-                "Landscapes",
-                "Lodging",
-                "Mountains",
-                "Oceans",
-                "Parks",
-                "Sports",
-                "Trails",
-                "Transportation",
-                "Viewpoints",
-                "Wildlife",
-                "Tmp",
-                "Relaxing",
-                "Music",
-                "12",
-                "New",
-              ],
-            ];
+            if (fs.existsSync(filePath)) {
+              // If the file exists, delete it
+              await fs.unlink(filePath, async (error) => {
+                if (error) {
+                  console.error("Error deleting the existing image:", error);
+                } else {
+                  const fileStream = await fs.createWriteStream(filePath);
+                  imageResponse.data.pipe(fileStream);
+                }
+              });
+            } else {
+              const fileStream = await fs.createWriteStream(filePath);
+              imageResponse.data.pipe(fileStream);
+            }
 
             // Determine the best-fit category
 
@@ -150,11 +116,10 @@ class GoogleAPIService {
           "geometry.location.lat": payload[i].geometry.location.lat,
           name: payload[i].name,
         });
-        console.log("placeExists-", placeExists);
         if (placeExists.length <= 0) {
           insertionData.push({
             ...payload[i],
-            image: `/image/${fileName}`,
+            image: `/images/${fileName}`,
             address_components: address_components,
           });
         } else {
@@ -171,7 +136,7 @@ class GoogleAPIService {
                 rating: payload[i].rating,
                 types: payload[i].types,
                 user_ratings_total: payload[i].user_ratings_total,
-                image: `/image/${fileName}`,
+                image: `/images/${fileName}`,
                 address_components: address_components,
                 updatedAt: new Date(),
               },
