@@ -28,14 +28,22 @@ class SearchPlacesService {
             address_components: placeDetails.data.result.address_components,
             name: placeDetails.data.result.name,
             formatted_address: placeDetails.data.result.formatted_address,
-            icon: placeDetails.data.result.icon,
-            photos: placeDetails.data.result.photos,
+            icon: placeDetails.data.result.icon
+              ? placeDetails.data.result.icon
+              : "",
+            photos: placeDetails.data.result.photos
+              ? placeDetails.data.result.photos
+              : [],
             place_id: searchResponse[i].place_id,
             plus_code: {},
             geometry: placeDetails.data.result.geometry,
-            rating: placeDetails.data.result.rating,
+            rating: placeDetails.data.result.rating
+              ? placeDetails.data.result.rating
+              : 0,
             types: placeDetails.data.result.types,
-            user_ratings_total: placeDetails.data.result.user_ratings_total,
+            user_ratings_total: placeDetails.data.result.user_ratings_total
+              ? placeDetails.data.result.user_ratings_total
+              : 0,
             image: "",
             category_ids: [],
             tag_ids: [],
