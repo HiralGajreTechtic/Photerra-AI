@@ -1,6 +1,5 @@
 const googlePlaceModel = require("../src/models/googlePlacesModel");
 const axios = require("axios");
-const fetch = require("node-fetch");
 const mongoose = require("mongoose");
 const { ObjectId } = mongoose.Types;
 const apiKey = process.env.GOOGLE_API_KEY;
@@ -82,7 +81,6 @@ class GoogleAPIService {
             const imagesDirectory = path.join(publicDirectory, "images");
             // Define the file path for the image
             fileName = `${payload[i].place_id}.jpg`;
-
             // Construct the file path
             const filePath = path.join(imagesDirectory, fileName);
             console.log("filePath=", filePath);
@@ -101,13 +99,6 @@ class GoogleAPIService {
               const fileStream = await fs.createWriteStream(filePath);
               imageResponse.data.pipe(fileStream);
             }
-
-            // Determine the best-fit category
-
-            // const imagePath = filePath;
-            // const model = await this.loadModel();
-            // const predictions = await this.classifyImage(imagePath, model);
-            // console.log("predictions==", predictions);
           }
         }
 
