@@ -120,7 +120,7 @@ class GoogleAPIService {
             {
               $set: {
                 formatted_address: payload[i].formatted_address,
-                icon: payload[i].icon,
+                icon: `/images/${fileName}`,
                 photos: payload[i].photos,
                 place_id: payload[i].place_id,
                 plus_code: payload[i].plus_code,
