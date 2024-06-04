@@ -12,7 +12,7 @@ class SearchPlacesService {
       });
       if (result?.length) {
         for (let i in result) {
-          result[i].name = result[i].name + " - " + result[i].formatted_address;
+          result[i].name = result[i].name;
         }
       } else {
         let url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${search}&key=${apiKey}`;
