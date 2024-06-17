@@ -1,7 +1,7 @@
 {
     "apps": [
         {
-            "name": "photerra-ai",
+            "name": "photerra-ai-backend-7000",
             "script": "npm",
             "args": "run start:prod",
             "out_file": "/dev/null",
