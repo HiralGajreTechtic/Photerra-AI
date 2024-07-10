@@ -7,7 +7,13 @@ const fs = require("fs");
 const path = require("path");
 const tf = require("@tensorflow/tfjs-node");
 const mobilenet = require("@tensorflow-models/mobilenet");
-
+const AWS = require("aws-sdk");
+const mime = require("mime-types");
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_DEFAULT_REGION,
+});
 class GoogleAPIService {
   static async getData(req) {
     try {
@@ -51,10 +57,12 @@ class GoogleAPIService {
 
   static async insertUpdateData(payload) {
     try {
-      //give teh catgeories to AI and it will find the category as per image
+      //give the catgeories to AI and it will find the category as per image
       let insertionData = [];
-      const filePaths = [];
-      let address_components, fileName;
+      let address_components,
+        fileName,
+        mimetype = "",
+        imageName = "";
 
       for (let i in payload) {
         //get the address components
@@ -66,39 +74,36 @@ class GoogleAPIService {
         if (payload[i].photos?.length > 0) {
           //get the photos
           const apiUrl = "https://maps.googleapis.com/maps/api/place/photo";
-          const params = {
+          let params = {
             maxwidth: 400,
             photoreference: payload[i].photos[0].photo_reference,
             key: apiKey,
           };
-          const imageResponse = await axios.get(apiUrl, {
+          let imageResponse = await axios.get(apiUrl, {
             params,
-            responseType: "stream",
+            responseType: "arraybuffer",
           });
 
           if (imageResponse) {
-            const publicDirectory = path.join(__dirname, "..", "public");
-            const imagesDirectory = path.join(publicDirectory, "images");
-            // Define the file path for the image
-            fileName = `${payload[i].place_id}.jpg`;
-            // Construct the file path
-            const filePath = path.join(imagesDirectory, fileName);
-            console.log("filePath=", filePath);
-            // Check if the file exists
-            if (fs.existsSync(filePath)) {
-              // If the file exists, delete it
-              await fs.unlink(filePath, async (error) => {
-                if (error) {
-                  console.error("Error deleting the existing image:", error);
-                } else {
-                  const fileStream = await fs.createWriteStream(filePath);
-                  imageResponse.data.pipe(fileStream);
-                }
-              });
-            } else {
-              const fileStream = await fs.createWriteStream(filePath);
-              imageResponse.data.pipe(fileStream);
+            let buffer = Buffer.from(imageResponse.data, "binary");
+            let mimeType = imageResponse.headers["content-type"];
+            if (!mimeType) {
+              mimeType = mime.lookup(url);
             }
+            fileName = `${payload[i].place_id}.jpg`;
+
+            let imagePath = `googlePlacesImages/${
+              new Date().getTime() + "-" + fileName
+            }`;
+            let s3params = {
+              Bucket: process.env.AWS_S3_POST_BUCKET,
+              Key: imagePath,
+              Body: buffer,
+              ContentType: mimetype,
+              ContentDisposition: "inline",
+            };
+            let resp = await s3.upload(s3params).promise();
+            imageName = resp?.Location;
           }
         }
 
@@ -110,24 +115,51 @@ class GoogleAPIService {
         if (placeExists.length <= 0) {
           insertionData.push({
             ...payload[i],
-            image: `/images/${fileName}`,
+            image: imageName,
             address_components: address_components,
           });
         } else {
           let place_id = placeExists[0]._id;
+          if (
+            placeExists[0].icon.includes(
+              "https://photerra-app-images.s3.amazonaws.com/"
+            )
+          ) {
+            const deleteParams = {
+              Bucket: process.env.AWS_S3_POST_BUCKET,
+              Key: placeExists[0].icon.split(
+                "https://photerra-app-images.s3.amazonaws.com/"
+              )[1],
+            };
+            await s3.deleteObject(deleteParams).promise();
+          }
+          if (
+            placeExists[0].image.includes(
+              "https://photerra-app-images.s3.amazonaws.com/"
+            )
+          ) {
+            const deleteParams = {
+              Bucket: process.env.AWS_S3_POST_BUCKET,
+              Key: placeExists[0].image.split(
+                "https://photerra-app-images.s3.amazonaws.com/"
+              )[1],
+            };
+            await s3.deleteObject(deleteParams).promise();
+          }
+
           await googlePlaceModel.updateOne(
             { _id: place_id },
             {
               $set: {
                 formatted_address: payload[i].formatted_address,
-                icon: `/images/${fileName}`,
+                icon: imageName,
                 photos: payload[i].photos,
                 place_id: payload[i].place_id,
                 plus_code: payload[i].plus_code,
                 rating: payload[i].rating,
                 types: payload[i].types,
                 user_ratings_total: payload[i].user_ratings_total,
-                image: `/images/${fileName}`,
+                image: imageName,
                 address_components: address_components,
                 updatedAt: new Date(),
               },
